@@ -41,6 +41,8 @@
 #undef XtIsRealized
 #endif
 
+extern GBool autoExec;
+
 //------------------------------------------------------------------------
 
 // Divide a 16-bit value (in [0, 255*255]) by 255, returning an 8-bit result.
@@ -556,7 +558,7 @@ void XPDFCore::doAction(LinkAction *action) {
 #endif
       msg = new GString("About to execute the command:\n");
       msg->append(fileName);
-      if (doQuestionDialog("Launching external application", msg)) {
+      if (autoExec || doQuestionDialog("Launching external application", msg)) {
 	system(fileName->getCString());
       }
       delete fileName;

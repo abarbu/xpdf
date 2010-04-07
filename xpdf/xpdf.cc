@@ -46,8 +46,11 @@ static GBool quiet = gFalse;
 static char cfgFileName[256] = "";
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
+GBool autoExec = gFalse;
 
 static ArgDesc argDesc[] = {
+  {"-autoexec",   argFlag,        &autoExec,      0,
+   "don't ask to execute external commands (dangerous!)"},
   {"-g",          argStringDummy, NULL,           0,
    "initial window geometry"},
   {"-geometry",   argStringDummy, NULL,           0,
@@ -225,7 +228,7 @@ int main(int argc, char *argv[]) {
   ok = ok && argc >= 1 && argc <= 3;
   if (remoteCmd[0]) {
     ok = ok && remoteName[5] && !doRemoteReload && !doRemoteRaise &&
-         !doRemoteQuit && argc == 1;
+	 !doRemoteQuit && argc == 1;
   }
   if (doRemoteReload) {
     ok = ok && remoteName[5] && !doRemoteQuit && argc == 1;
@@ -296,9 +299,9 @@ int main(int argc, char *argv[]) {
 
   // check for password string(s)
   ownerPasswordStr = ownerPassword[0] != '\001' ? new GString(ownerPassword)
-                                                : (GString *)NULL;
+						: (GString *)NULL;
   userPasswordStr = userPassword[0] != '\001' ? new GString(userPassword)
-                                              : (GString *)NULL;
+					      : (GString *)NULL;
 
   // open the file and run the main loop
   if (destName) {
