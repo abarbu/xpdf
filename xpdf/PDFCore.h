@@ -243,6 +243,7 @@ public:
   virtual void setBusyCursor(GBool busy) = 0;
   LinkAction *findLink(int pg, double x, double y);
 
+  void linklocation(Link *link);
 protected:
 
   int loadFile2(PDFDoc *newDoc);
@@ -276,7 +277,7 @@ protected:
   int drawAreaWidth,		// size of the PDF display area
       drawAreaHeight;
   double maxUnscaledPageW,	// maximum unscaled page size
-         maxUnscaledPageH;
+	 maxUnscaledPageH;
   int maxPageW;			// maximum page width (only used in
 				//   continuous mode)
   int totalDocH;		// total document height (only used in
@@ -303,9 +304,9 @@ protected:
     history[pdfHistorySize];
   int historyCur;               // currently displayed page
   int historyBLen;              // number of valid entries backward from
-                                //   current entry
+				//   current entry
   int historyFLen;              // number of valid entries forward from
-                                //   current entry
+				//   current entry
 
 
   GList *pages;			// cached pages [PDFCorePage]

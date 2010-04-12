@@ -27,6 +27,8 @@
 #include "TextOutputDev.h"
 #include "CoreOutputDev.h"
 #include "PDFCore.h"
+#include <iostream>
+#include <sstream>
 
 //------------------------------------------------------------------------
 // PDFCorePage
@@ -368,6 +370,10 @@ void PDFCore::displayDest(LinkDest *dest, double zoomA, int rotateA,
 
 void PDFCore::update(int topPageA, int scrollXA, int scrollYA,
 		     double zoomA, int rotateA, GBool force, GBool addToHist) {
+  printf("update %d %d %d %f %d %d %d\n",
+	 topPageA,  scrollXA,  scrollYA,
+	 zoomA,  rotateA,  force,  addToHist);
+
   double hDPI, vDPI, dpiA, uw, uh, ut;
   int w, h, t, x0, x1, y0, y1, x, y;
   int rot;
@@ -555,7 +561,7 @@ void PDFCore::update(int topPageA, int scrollXA, int scrollYA,
       delete (PDFCorePage *)pages->del(i--);
     }
     j = pages->getLength() > 0 ? ((PDFCorePage *)pages->get(0))->page - 1
-                               : pg1;
+			       : pg1;
     for (i = pg0; i <= j; ++i) {
       rot = rotate + doc->getPageRotate(i);
       if (rot >= 360) {
@@ -564,7 +570,7 @@ void PDFCore::update(int topPageA, int scrollXA, int scrollYA,
 	rot += 360;
       }
       addPage(i, rot);
-    }      
+    }
     j = ((PDFCorePage *)pages->get(pages->getLength() - 1))->page;
     for (i = j + 1; i <= pg1; ++i) {
       rot = rotate + doc->getPageRotate(i);
@@ -752,6 +758,59 @@ void PDFCore::addPage(int pg, int rot) {
   pages->insert(i, page);
 }
 
+void PDFCore::linklocation(Link *link) {
+  double x1, y1, x2, y2;
+  int xMin, yMin, xMax, yMax, x, y;
+  link->getRect(&x1, &y1, &x2, &y2);
+  cvtUserToWindow(curPage->page, x1, y1, &x, &y);
+  xMin = xMax = x;
+  yMin = yMax = y;
+  cvtUserToWindow(curPage->page, x1, y2, &x, &y);
+  if (x < xMin) {
+    xMin = x;
+  } else if (x > xMax) {
+    xMax = x;
+  }
+  if (y < yMin) {
+    yMin = y;
+  } else if (y > yMax) {
+    yMax = y;
+  }
+  cvtUserToWindow(curPage->page, x2, y1, &x, &y);
+  if (x < xMin) {
+    xMin = x;
+  } else if (x > xMax) {
+    xMax = x;
+  }
+  if (y < yMin) {
+    yMin = y;
+  } else if (y > yMax) {
+    yMax = y;
+  }
+  cvtUserToWindow(curPage->page, x2, y2, &x, &y);
+  if (x < xMin) {
+    xMin = x;
+  } else if (x > xMax) {
+    xMax = x;
+  }
+  if (y < yMin) {
+    yMin = y;
+  } else if (y > yMax) {
+    yMax = y;
+  }
+
+  std::stringstream out; out << xMin;
+  setenv("XPDF_X", out.str().c_str(), 1); out.str("");
+  out << yMin;
+  setenv("XPDF_Y", out.str().c_str(), 1); out.str("");
+  out << (xMax - xMin);
+  setenv("XPDF_H", out.str().c_str(), 1); out.str("");
+  out << (yMax - yMin);
+  setenv("XPDF_W", out.str().c_str(), 1); out.str("");
+  printf("Link loc %d %d %d %d\n", xMin, yMin, xMax, yMax);
+}
+
+
 void PDFCore::needTile(PDFCorePage *page, int x, int y) {
   PDFCoreTile *tile;
   TextOutputDev *textOut;
@@ -838,6 +897,24 @@ void PDFCore::needTile(PDFCorePage *page, int x, int y) {
   memcpy(tile->ictm, out->getDefICTM(), 6 * sizeof(double));
   if (!page->links) {
     page->links = doc->getLinks(page->page);
+    Links *links = page->links;
+    for(int i = 0; i < links->getNumLinks(); ++i)
+    {
+      printf("Link action %d %d %d\n",
+	     i,
+	     links->getLink(i)->isOk(),
+	     links->getLink(i)->getAction()->getKind());
+      if(actionLaunch == links->getLink(i)->getAction()->getKind())
+      {
+	GString name;
+	name.append("( ");
+	name.append(((LinkLaunch*)links->getLink(i)->getAction())->getFileName());
+	name.append(" ) &");
+	printf("Command %s\n", name.getCString());
+	linklocation(links->getLink(i));
+	system(name.getCString());
+      }
+    }
   }
   if (!page->text) {
     if ((textOut = new TextOutputDev(NULL, gTrue, gFalse, gFalse))) {
@@ -1128,9 +1205,9 @@ void PDFCore::zoomCentered(double zoomA) {
   if (zoomA == zoomPage) {
     if (continuousMode) {
       pageW = (rotate == 90 || rotate == 270) ? maxUnscaledPageH
-	                                      : maxUnscaledPageW;
+					      : maxUnscaledPageW;
       pageH = (rotate == 90 || rotate == 270) ? maxUnscaledPageW
-	                                      : maxUnscaledPageH;
+					      : maxUnscaledPageH;
       dpi1 = 72.0 * (double)drawAreaWidth / pageW;
       dpi2 = 72.0 * (double)(drawAreaHeight - continuousModePageSpacing) /
 	     pageH;
@@ -1146,7 +1223,7 @@ void PDFCore::zoomCentered(double zoomA) {
   } else if (zoomA == zoomWidth) {
     if (continuousMode) {
       pageW = (rotate == 90 || rotate == 270) ? maxUnscaledPageH
-	                                      : maxUnscaledPageW;
+					      : maxUnscaledPageW;
     } else {
       rot = rotate + doc->getPageRotate(topPage);
       if (rot >= 360) {
@@ -1155,7 +1232,7 @@ void PDFCore::zoomCentered(double zoomA) {
 	rot += 360;
       }
       pageW = (rot == 90 || rot == 270) ? doc->getPageCropHeight(topPage)
-	                                : doc->getPageCropWidth(topPage);
+					: doc->getPageCropWidth(topPage);
     }
     dpi1 = 72.0 * (double)drawAreaWidth / pageW;
     sx = 0;
@@ -1171,7 +1248,7 @@ void PDFCore::zoomCentered(double zoomA) {
       hAdjust = 0;
     }
     sx = (int)((scrollX - hAdjust + drawAreaWidth / 2) * (dpi1 / dpi)) -
-         drawAreaWidth / 2;
+	 drawAreaWidth / 2;
     if (sx < 0) {
       sx = 0;
     }
@@ -1198,10 +1275,10 @@ void PDFCore::zoomCentered(double zoomA) {
     vAdjust = (topPage - 1) * continuousModePageSpacing;
     sy = sy + (int)((scrollY - pageY[topPage - 1] + drawAreaHeight / 2)
 		    * (dpi1 / dpi))
-         + vAdjust - drawAreaHeight / 2;
+	 + vAdjust - drawAreaHeight / 2;
   } else {
     sy = (int)((scrollY + drawAreaHeight / 2) * (dpi1 / dpi))
-         - drawAreaHeight / 2;
+	 - drawAreaHeight / 2;
   }
 
   update(topPage, sx, sy, zoomA, rotate, gFalse, gFalse);
@@ -1278,10 +1355,10 @@ void PDFCore::zoomToCurrentWidth() {
     vAdjust = (topPage - 1) * continuousModePageSpacing;
     sy = sy + (int)((scrollY - pageY[topPage - 1] + drawAreaHeight / 2)
 		    * (dpi1 / dpi))
-         + vAdjust - drawAreaHeight / 2;
+	 + vAdjust - drawAreaHeight / 2;
   } else {
     sy = (int)((scrollY + drawAreaHeight / 2) * (dpi1 / dpi))
-         - drawAreaHeight / 2;
+	 - drawAreaHeight / 2;
   }
 
   update(topPage, sx, sy, (dpi1 * 100) / 72, rotate, gFalse, gFalse);
