@@ -765,8 +765,37 @@ Links::~Links() {
 LinkAction *Links::find(double x, double y) {
   int i;
 
+  /*
+  double xa1, ya1, xa2, ya2;
+  */
+  /*
+  for (i = numLinks - 1; i >= 0; --i) {
+    links[i]->getRect(&xa1, &xa2, &ya1, &ya2);
+    printf("Links %f %f %f %f %d\n", xa1, xa2, ya1, ya2, links[i]->getAction()->getKind());
+  }
+  */
+
   for (i = numLinks - 1; i >= 0; --i) {
     if (links[i]->inRect(x, y)) {
+      /*
+      links[i]->getRect(&xa1, &xa2, &ya1, &ya2);
+      printf("Link %f %f %f %f %d\n", xa1, xa2, ya1, ya2, links[i]->getAction()->getKind());
+      */
+      return links[i]->getAction();
+    }
+  }
+  return NULL;
+}
+
+ LinkAction *Links::findBeamer(double xa1, double ya1, double xa2, double ya2) {
+  int i;
+  double xa1p, ya1p, xa2p, ya2p;
+  for (i = numLinks - 1; i >= 0; --i) {
+    links[i]->getRect(&xa1p, &xa2p, &ya1p, &ya2p);
+    if (((xa1-xa1p>=0&&xa1-xa1p<=1e-3)||(xa1p-xa1>=0&&xa1p-xa1<=1e-3))&&
+        ((ya1-ya1p>=0&&ya1-ya1p<=1e-3)||(ya1p-ya1>=0&&ya1p-ya1<=1e-3))&&
+        ((xa2-xa2p>=0&&xa2-xa2p<=1e-3)||(xa2p-xa2>=0&&xa2p-xa2<=1e-3))&&
+        ((ya2-ya2p>=0&&ya2-ya2p<=1e-3)||(ya2p-ya2>=0&&ya2p-ya2<=1e-3))) {
       return links[i]->getAction();
     }
   }

@@ -549,6 +549,9 @@ GBool openTempFile(GString **name, FILE **f, char *mode, char *ext) {
 }
 
 GBool executeCommand(char *cmd) {
+  /*
+  printf("Command gfile.cc %s\n", cmd);
+  */
 #ifdef VMS
   return system(cmd) ? gTrue : gFalse;
 #else

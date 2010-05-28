@@ -370,10 +370,11 @@ void PDFCore::displayDest(LinkDest *dest, double zoomA, int rotateA,
 
 void PDFCore::update(int topPageA, int scrollXA, int scrollYA,
 		     double zoomA, int rotateA, GBool force, GBool addToHist) {
+  /*
   printf("update %d %d %d %f %d %d %d\n",
 	 topPageA,  scrollXA,  scrollYA,
 	 zoomA,  rotateA,  force,  addToHist);
-
+  */
   double hDPI, vDPI, dpiA, uw, uh, ut;
   int w, h, t, x0, x1, y0, y1, x, y;
   int rot;
@@ -807,7 +808,9 @@ void PDFCore::linklocation(Link *link) {
   setenv("XPDF_H", out.str().c_str(), 1); out.str("");
   out << (yMax - yMin);
   setenv("XPDF_W", out.str().c_str(), 1); out.str("");
+  /*
   printf("Link loc %d %d %d %d\n", xMin, yMin, xMax, yMax);
+  */
 }
 
 
@@ -900,18 +903,22 @@ void PDFCore::needTile(PDFCorePage *page, int x, int y) {
     Links *links = page->links;
     for(int i = 0; i < links->getNumLinks(); ++i)
     {
+      /*
       printf("Link action %d %d %d\n",
 	     i,
 	     links->getLink(i)->isOk(),
 	     links->getLink(i)->getAction()->getKind());
+      */
       if(actionLaunch == links->getLink(i)->getAction()->getKind())
       {
 	GString name;
 	name.append("( ");
 	name.append(((LinkLaunch*)links->getLink(i)->getAction())->getFileName());
 	name.append(" ) &");
-	printf("Command %s\n", name.getCString());
 	linklocation(links->getLink(i));
+	/*
+	printf("Command PDFCore.cc %s\n", name.getCString());
+	*/
 	system(name.getCString());
       }
     }
@@ -1956,6 +1963,19 @@ LinkAction *PDFCore::findLink(int pg, double x, double y) {
 
   if ((page = findPage(pg))) {
     return page->links ? page->links->find(x, y) : (LinkAction *)NULL;
+  }
+  return NULL;
+}
+
+LinkAction *PDFCore::findBeamerLink(int pg,
+				    double xa1, double ya1,
+				    double xa2, double ya2) {
+  PDFCorePage *page;
+
+  if ((page = findPage(pg))) {
+    return page->links ?
+      page->links->findBeamer(xa1, ya1, xa2, ya2) :
+      (LinkAction *)NULL;
   }
   return NULL;
 }

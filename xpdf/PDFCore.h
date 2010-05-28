@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include "SplashTypes.h"
 #include "CharTypes.h"
+#include "Link.h"
 
 class GString;
 class GList;
@@ -242,6 +243,9 @@ public:
   int getDrawAreaHeight() { return drawAreaHeight; }
   virtual void setBusyCursor(GBool busy) = 0;
   LinkAction *findLink(int pg, double x, double y);
+  LinkAction *findBeamerLink(int pg,
+			     double xa1, double ya1,
+			     double xa2, double ya2);
 
   void linklocation(Link *link);
 protected:

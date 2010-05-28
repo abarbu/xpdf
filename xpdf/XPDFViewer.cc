@@ -163,6 +163,28 @@ static ZoomMenuInfo zoomMenuInfo[nZoomMenuItems] = {
 
 XPDFViewerCmd XPDFViewer::cmdTab[] = {
   { "about",                   0, gFalse, gFalse, &XPDFViewer::cmdAbout },
+  //no apendix icons
+  { "beamerBack",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerBack },
+  { "beamerFind",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerFind },
+  { "beamerForward",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerForward },
+  { "beamerFrameFirst",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerFrameFirst },
+  { "beamerFrameLast",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerFrameLast },
+  { "beamerNextFrame",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerNextFrame },
+  { "beamerNextSection",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerNextSection },
+  { "beamerNextSlide",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerNextSlide },
+  { "beamerNextSubsection",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerNextSubsection },
+  { "beamerPresentationFirst",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerPresentationFirst },
+  { "beamerPresentationLast",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerPresentationLast },
+  { "beamerPreviousFrame",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerPreviousFrame },
+  { "beamerPreviousSection",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerPreviousSection },
+  { "beamerPreviousSlide",                0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerPreviousSlide },
+  { "beamerPreviousSubsection",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerPreviousSubsection },
+  { "beamerSectionFirst",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerSectionFirst },
+  { "beamerSectionLast",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerSectionLast },
+  { "beamerSlide",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerSlide },
+  { "beamerSubsectionFirst",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerSubsectionFirst },
+  { "beamerSubsectionLast",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerSubsectionLast },
+  { "beamerUnknown",                 0, gTrue,  gFalse,  &XPDFViewer::cmdBeamerUnknown },
   { "closeOutline",            0, gFalse, gFalse, &XPDFViewer::cmdCloseOutline },
   { "closeWindow",             0, gFalse, gFalse, &XPDFViewer::cmdCloseWindow },
   { "continuousMode",          0, gFalse, gFalse, &XPDFViewer::cmdContinuousMode },
@@ -491,7 +513,13 @@ void XPDFViewer::doLink(int wx, int wy, GBool onlyIfNoSelection,
       core->cvtWindowToUser(wx, wy, &pg, &xu, &yu) &&
       !(onlyIfNoSelection &&
 	core->getSelection(&selPg, &selULX, &selULY, &selLRX, &selLRY))) {
+    /*
+    printf("XPDFViewer::doLink before findLink\n");
+    */
     if ((action = core->findLink(pg, xu, yu))) {
+      /*
+      printf("XPDFViewer::doLink after findLink\n");
+      */
       if (newWin &&
 	  core->getDoc()->getFileName() &&
 	  (action->getKind() == actionGoTo ||
@@ -503,6 +531,19 @@ void XPDFViewer::doLink(int wx, int wy, GBool onlyIfNoSelection,
       } else {
 	core->doAction(action);
       }
+    }
+  }
+}
+
+void XPDFViewer::doBeamerLink(double xa1, double xa2, double ya1, double ya2) {
+  LinkAction *action;
+  int pg;
+  double xu, yu;
+
+  if (core->getHyperlinksEnabled() &&
+      core->cvtWindowToUser(0, 0, &pg, &xu, &yu)) {
+    if ((action = core->findBeamerLink(pg, xa1, ya1, xa2, ya2))) {
+      core->doAction(action);
     }
   }
 }
@@ -683,7 +724,7 @@ void XPDFViewer::execCmd(GString *cmd, XEvent *event) {
   if (*p1) {
     goto err1;
   }
-  
+
   //----- find the command
   a = -1;
   b = nCmds;
@@ -858,6 +899,115 @@ void XPDFViewer::cmdFollowLinkInNewWinNoSel(GString *args[], int nArgs,
 void XPDFViewer::cmdFollowLinkNoSel(GString *args[], int nArgs,
 				    XEvent *event) {
   doLink(mouseX(event), mouseY(event), gTrue, gFalse);
+}
+
+//Links 142.162000 0.400000 220.667000 7.763000 0  unknown
+//Links 352.030000 9.738000 360.996000 19.203000 4 forward
+//Links 346.052000 9.738000 354.022000 19.203000 4 find
+//Links 339.078000 9.738000 348.045000 19.203000 4 back
+//Links 327.123000 9.738000 340.075000 19.203000 0 presentationLast
+//Links 318.157000 9.738000 329.116000 19.203000 0 presentationFirst
+//Links 312.179000 9.738000 319.153000 19.203000 0 nextSection
+//Links 307.198000 9.738000 314.172000 19.203000 0 sectionLast
+//Links 302.217000 9.738000 309.190000 19.203000 0 sectionFirst
+//Links 297.235000 9.738000 304.209000 19.203000 0 previousSection
+//Links 291.258000 9.738000 298.232000 19.203000 0 nextSubsection
+//Links 286.276000 9.738000 293.250000 19.203000 0 subsectionLast
+//Links 281.295000 9.738000 288.269000 19.203000 0 subsectionFirst
+//Links 276.314000 9.738000 283.288000 19.203000 0 previousSubsection
+//Links 270.336000 9.738000 277.310000 19.203000 0 nextFrame
+//Links 265.355000 9.738000 272.329000 19.203000 0 frameLast
+//Links 260.374000 9.738000 267.347000 19.203000 0 frameFirst
+//Links 255.392000 9.738000 262.366000 19.203000 0 previousFrame
+//Links 248.418000 9.738000 256.388000 19.203000 0 nextSlide
+//Links 240.448000 9.738000 250.411000 19.203000 4 slide
+//Links 234.471000 9.738000 242.441000 19.203000 0 previousSlide
+
+//no apendix icons
+void XPDFViewer::cmdBeamerPreviousSlide(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(234.471000, 9.738000, 242.441000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerSlide(GString *args[], int nArgs, XEvent *event) {
+  //Error: Unknown named action: 'GoToPage'
+  doBeamerLink(240.448000, 9.738000, 250.411000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerNextSlide(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(248.418000, 9.738000, 256.388000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerPreviousFrame(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(255.392000, 9.738000, 262.366000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerFrameFirst(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(260.374000, 9.738000, 267.347000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerFrameLast(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(265.355000, 9.738000, 272.329000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerNextFrame(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(270.336000, 9.738000, 277.310000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerPreviousSubsection(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(276.314000, 9.738000, 283.288000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerSubsectionFirst(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(281.295000, 9.738000, 288.269000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerSubsectionLast(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(286.276000, 9.738000, 293.250000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerNextSubsection(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(291.258000, 9.738000, 298.232000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerPreviousSection(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(297.235000, 9.738000, 304.209000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerSectionFirst(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(302.217000, 9.738000, 309.190000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerSectionLast(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(307.198000, 9.738000, 314.172000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerNextSection(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(312.179000, 9.738000, 319.153000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerPresentationFirst(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(318.157000, 9.738000, 329.116000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerPresentationLast(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(327.123000, 9.738000, 340.075000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerBack(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(339.078000, 9.738000, 348.045000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerFind(GString *args[], int nArgs, XEvent *event) {
+  //Error: Unknown named action: 'Find'
+  doBeamerLink(346.052000, 9.738000, 354.022000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerForward(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(352.030000, 9.738000, 360.996000, 19.203000);
+}
+
+void XPDFViewer::cmdBeamerUnknown(GString *args[], int nArgs, XEvent *event) {
+  doBeamerLink(142.162000, 0.400000, 220.667000, 7.763000);
 }
 
 void XPDFViewer::cmdFullScreenMode(GString *args[], int nArgs,
@@ -1144,6 +1294,9 @@ void XPDFViewer::cmdRun(GString *args[], int nArgs,
 #else
   cmd->append(" &");
 #endif
+  /*
+  printf("Command XPDFViewer.cc %s\n", cmd->getCString());
+  */
   system(cmd->getCString());
   delete cmd;
 }

@@ -357,6 +357,8 @@ public:
   // else return NULL.
   LinkAction *find(double x, double y);
 
+  LinkAction *findBeamer(double xa1, double ya1, double xa2, double ya2);
+
   // Return true if <x>,<y> is in a link.
   GBool onLink(double x, double y);
 

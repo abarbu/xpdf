@@ -90,6 +90,7 @@ private:
 
   //----- hyperlinks / actions
   void doLink(int wx, int wy, GBool onlyIfNoSelection, GBool newWin);
+  void doBeamerLink(double xa1, double xa2, double ya1, double ya2);
   static void actionCbk(void *data, char *action);
 
   //----- keyboard/mouse input
@@ -114,6 +115,27 @@ private:
   void cmdFollowLinkInNewWin(GString *args[], int nArgs, XEvent *event);
   void cmdFollowLinkInNewWinNoSel(GString *args[], int nArgs, XEvent *event);
   void cmdFollowLinkNoSel(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerPreviousSlide(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerSlide(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerNextSlide(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerPreviousFrame(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerFrameFirst(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerFrameLast(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerNextFrame(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerPreviousSubsection(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerSubsectionFirst(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerSubsectionLast(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerNextSubsection(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerPreviousSection(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerSectionFirst(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerSectionLast(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerNextSection(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerPresentationFirst(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerPresentationLast(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerBack(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerFind(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerForward(GString *args[], int nArgs, XEvent *event);
+  void cmdBeamerUnknown(GString *args[], int nArgs, XEvent *event);
   void cmdFullScreenMode(GString *args[], int nArgs, XEvent *event);
   void cmdGoBackward(GString *args[], int nArgs, XEvent *event);
   void cmdGoForward(GString *args[], int nArgs, XEvent *event);

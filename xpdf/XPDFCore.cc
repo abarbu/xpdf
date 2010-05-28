@@ -559,6 +559,9 @@ void XPDFCore::doAction(LinkAction *action) {
       msg = new GString("About to execute the command:\n");
       msg->append(fileName);
       if (autoExec || doQuestionDialog("Launching external application", msg)) {
+	/*
+	printf("Command XPDFCore.cc 1 %s\n", fileName->getCString());
+	*/
 	system(fileName->getCString());
       }
       delete fileName;
@@ -681,6 +684,9 @@ void XPDFCore::runCommand(GString *cmdFmt, GString *arg) {
 #else
   cmd->append(" &");
 #endif
+  /*
+  printf("Command XPDFCore.cc 2 %s\n", cmd->getCString());
+  */
   system(cmd->getCString());
   delete cmd;
 }
@@ -1090,6 +1096,9 @@ void XPDFCore::inputCbk(Widget widget, XtPointer ptr, XtPointer callData) {
       } else if (core->hyperlinksEnabled) {
 	core->cvtDevToUser(pg, x, y, &xu, &yu);
 	if (ok && (action = core->findLink(pg, xu, yu))) {
+	  /*
+	  printf("XPDFCore::inputCbk\n");
+	  */
 	  core->setCursor(core->linkCursor);
 	  if (action != core->linkAction) {
 	    core->linkAction = action;

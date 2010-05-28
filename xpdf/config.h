@@ -53,9 +53,9 @@
 
 // user config file name, relative to the user's home directory
 #if defined(VMS) || (defined(WIN32) && !defined(__CYGWIN32__))
-#define xpdfUserConfigFile "xpdfrc"
+#define xpdfUserConfigFile "xpdfrc-beamer"
 #else
-#define xpdfUserConfigFile ".xpdfrc"
+#define xpdfUserConfigFile ".xpdfrc-beamer"
 #endif
 
 // system config file name (set via the configure script)
